@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta charset="UTF-8"></head>
+<head><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta charset="UTF-8">
+<style>
+    .hidden {
+        display:none;
+    }
+</style>
+</head>
 <body>
 <h1>Triangle Maker</h1>
 
@@ -12,7 +18,8 @@
 </p>
 <button id="generate">Generate Diagram</button>
 <button id="copy">Copy to clipboard</button>
-<p></p>
+<span id="check" class="hidden">✅</span>
+<p></p> 
 
 <canvas id="myCanvas" width="300" height="300" style="border:1px solid black;">
 Sorry, your browser does not support canvas.
