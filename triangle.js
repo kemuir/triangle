@@ -26,16 +26,10 @@ export function generateTriangle(){
     const angB = (ang2 != angMin && ang2 != angMax) ? (180 - Math.round((Math.abs(ang1-ang3)/2)*180/Math.PI)) : (Math.round((Math.abs(ang1-ang3)/2)*180/Math.PI)) 
     const angC = (ang3 != angMin && ang3 != angMax) ? (180 - Math.round((Math.abs(ang2-ang1)/2)*180/Math.PI)) : (Math.round((Math.abs(ang2-ang1)/2)*180/Math.PI))
 
-    ctx.strokeStyle = "red"
-    ctx.beginPath();
-    ctx.moveTo(pointA.x,pointA.y);
-    ctx.lineTo(pointB.x,pointB.y);
-    ctx.lineTo(pointC.x,pointC.y);
-    ctx.lineTo(pointA.x,pointA.y);
-    ctx.stroke();
-
     scaleAndCentre(pointA,pointB,pointC)
+    const cent = centroid(pointA, pointB, pointC)
 
+    ctx.font = "14px Arial"
     ctx.textAlign = "center"
     ctx.strokeStyle = "black"
     ctx.lineWidth = 3;
@@ -47,12 +41,35 @@ export function generateTriangle(){
     ctx.lineTo(pointA.x,pointA.y);
     ctx.stroke();
 
+    // angle measures
     ctx.fillText("A:"+angA,20,20)
     ctx.fillText("B:"+angB,60,20)
     ctx.fillText("C:"+angC,100,20)
+
+    // label angles
+    const ALoc = angleLabelLocation(cent,pointA)
+    const BLoc = angleLabelLocation(cent,pointB)
+    const CLoc = angleLabelLocation(cent,pointC)
+    ctx.fillText("A",ALoc.x,ALoc.y)
+    ctx.fillText("B",BLoc.x,BLoc.y)
+    ctx.fillText("C",CLoc.x,CLoc.y)
+
+    // angle markers
+    ctx.lineWidth = 1;
+    const points = [pointA, pointB, pointC]
+    for (let i=0; i<3;i++){
+        let startAng = angleFromZero(points[i], points[(i+1) % 3])
+        let endAng = angleFromZero(points[i],points[(i+2) % 3])
+        if (endAng<startAng){
+            [startAng,endAng] = [endAng,startAng];
+        }
+        ctx.beginPath();
+        ctx.arc(points[i].x,points[i].y, 15, startAng, endAng);
+        ctx.stroke();
+    }
 }
 
-function length(point1,point2){
+function dist(point1,point2){
     return (Math.sqrt(((point1.x-point2.x)**2)+((point1.y-point2.y)**2)))
 }
 
@@ -62,6 +79,18 @@ function midpoint(point1,point2){
 
 function centroid(point1,point2,point3){
     return {x:(point1.x+point2.x+point3.x)/3,y:(point1.y+point2.y+point3.y)/3}
+}
+function angleLabelLocation(pointM, pointX){
+    //pointM is midpoint, pointX is corner
+    const distance = dist(pointM,pointX);
+    const rat = 10/distance
+    const deltax = pointM.x - pointX.x
+    const deltay = pointM.y - pointX.y
+    return {x:pointX.x-(deltax*rat), y:pointX.y-(deltay*rat)+7}
+}
+
+function angleFromZero(point1, point2){
+    return Math.atan((point1.y-point2.y)/(point1.x-point2.x))
 }
 
 function scaleAndCentre(point1, point2, point3) {
@@ -113,12 +142,6 @@ function scaleAndCentre(point1, point2, point3) {
     } else {
         midtb = point1
     }
-    console.log("Left: ("+leftmost.x+","+leftmost.y)
-    console.log("Right: ("+rightmost.x+","+rightmost.y) 
-    console.log("Top: ("+topmost.x+","+topmost.y) 
-    console.log("Bottom: ("+bottommost.x+","+bottommost.y) 
-    console.log("Mid lr: ("+midlr.x+","+midlr.y) 
-    console.log("Mid tb: ("+midtb.x+","+midtb.y) 
     
     const height = bottommost.y - topmost.y
     const width = rightmost.x - leftmost.x
@@ -127,7 +150,6 @@ function scaleAndCentre(point1, point2, point3) {
     const lrprop = (midlr.x - leftmost.x)/width
     if (prop > 1){
         const newwid = 250/prop
-        console.log("newwid: "+newwid +"   lrprop: " + lrprop)
         topmost.y = 25
         bottommost.y = 275
         midtb.y = 25+(tbprop*250)
@@ -136,7 +158,6 @@ function scaleAndCentre(point1, point2, point3) {
         midlr.x = leftmost.x + newwid*lrprop
     } else {
         const newhei = 250*prop
-        console.log("newhei: "+newhei +"   tbprop: " + tbprop)
         leftmost.x = 25
         rightmost.x = 275
         midlr.x = 25+(lrprop*250)

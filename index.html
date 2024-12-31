@@ -10,12 +10,21 @@
 <body>
 <h1>Triangle Maker</h1>
 
-<p>Solve for the:</p>
-  <input type="radio" id="hyp" name="mode" value="hyp" checked>
-  <label for="hyp">Hypotenuse</label><br>
-  <input type="radio" id="leg" name="mode" value="leg">
-  <label for="leg">Leg</label><br>
-</p>
+<p>Make a:</p>
+  <input type="radio" id="right" name="type" value="right" checked>
+  <label for="right">Right Triangle</label><br>
+  <input type="radio" id="oblique" name="type" value="oblique">
+  <label for="oblique">Oblique Triangle</label><br>
+
+<div id="hypToggle" class = "">
+    <p>Solve for the:</p>
+      <input type="radio" id="hyp" name="mode" value="hyp" checked>
+      <label for="hyp">Hypotenuse</label><br>
+      <input type="radio" id="leg" name="mode" value="leg">
+      <label for="leg">Leg</label><br>
+</div>
+<p></p>
+
 <button id="generate">Generate Diagram</button>
 <button id="copy">Copy to clipboard</button>
 <span id="check" class="hidden">✅</span>
