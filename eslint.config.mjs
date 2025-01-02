@@ -1,9 +1,21 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+import { addExtensions, litConfig, nodeConfig, setDirectoryConfigs, testingConfig } from 'eslint-config-brightspace';
 
-
-/** @type {import('eslint').Linter.Config[]} */
 export default [
-  {languageOptions: { globals: globals.browser }},
-  pluginJs.configs.recommended,
+	{
+		ignores: ['build']
+	},
+	...setDirectoryConfigs(
+		addExtensions(litConfig, ['.js', '.html']),
+		{
+			'**/test':testingConfig,
+			cli: nodeConfig
+		}
+	),
+	{
+		languageOptions: {
+			globals: {
+				Prism: false,
+			},
+		},
+	},
 ];
