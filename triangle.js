@@ -8,7 +8,7 @@ export function generateTriangle(){
     let ang3 = Math.random()*2*Math.PI
 
     // If angles are too close, regenerate
-    while (Math.abs(ang1 - ang2) < 0.4 || Math.abs(ang1 - ang3) < 0.4 || Math.abs(ang1 - ang2) < 0.4) {
+    while (Math.abs(ang1 - ang2) < 0.4 || Math.abs(ang1 - ang3) < 0.4 || Math.abs(ang3 - ang2) < 0.4) {
         ang1 = Math.random()*2*Math.PI
         ang2 = Math.random()*2*Math.PI
         ang3 = Math.random()*2*Math.PI
@@ -60,11 +60,22 @@ export function generateTriangle(){
     for (let i=0; i<3;i++){
         let startAng = angleFromZero(points[i], points[(i+1) % 3])
         let endAng = angleFromZero(points[i],points[(i+2) % 3])
+        let rad
+        if (Math.abs(startAng - endAng) < Math.PI/8){
+            rad = 20
+        } else if (Math.abs(startAng - endAng) > 3*Math.PI /4){
+            rad = 10
+        } else {
+            rad = 15
+        }
         if (endAng<startAng){
             [startAng,endAng] = [endAng,startAng];
         }
+        if (endAng-startAng > Math.PI){
+            [startAng,endAng] = [endAng,startAng];
+        }
         ctx.beginPath();
-        ctx.arc(points[i].x,points[i].y, 15, startAng, endAng);
+        ctx.arc(points[i].x,points[i].y, rad, startAng, endAng);
         ctx.stroke();
     }
 }
@@ -90,7 +101,14 @@ function angleLabelLocation(pointM, pointX){
 }
 
 function angleFromZero(point1, point2){
-    return Math.atan((point1.y-point2.y)/(point1.x-point2.x))
+    const raa = Math.atan((point1.y-point2.y)/(point1.x-point2.x))
+    if (point1.x>point2.x){
+        return raa + Math.PI
+    } else if (raa<0) {
+        return raa + (2* Math.PI)
+    } else {
+        return raa
+    }
 }
 
 function scaleAndCentre(point1, point2, point3) {
