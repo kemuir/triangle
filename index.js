@@ -1,6 +1,6 @@
+import { copyToCB } from './util.js';
 import { generateRightTriangle } from './right_triangle.js';
 import { generateTriangle } from './triangle.js';
-import { copyToCB } from './util.js';
 
 function generate() {
 	if (document.getElementById('right').checked) {
