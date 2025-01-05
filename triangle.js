@@ -14,21 +14,46 @@ export function generateTriangle() {
 		ang3 = Math.random() * 2 * Math.PI;
 	}
 
+	/* Come back to this - why is ctx.height undefined?
+	const circumcent = { x:ctx.width / 2, y:ctx.height / 2 };
+	const rad = ctx.height * 5 / 12
+	*/
+	const circumcent = { x: 150, y: 150 };
+	const rad = 125;
+
 	//Calculate x,y coordinates based on angles
-	const pointA = { x:150 + (125 * Math.cos(ang1)), y:150 - (125 * Math.sin(ang1)) };
-	const pointB = { x:150 + (125 * Math.cos(ang2)), y:150 - (125 * Math.sin(ang2)) };
-	const pointC = { x:150 + (125 * Math.cos(ang3)), y:150 - (125 * Math.sin(ang3)) };
+	const pointA = { x:circumcent.x + (rad * Math.cos(ang1)), y:circumcent.y - (rad * Math.sin(ang1)) };
+	const pointB = { x:circumcent.x + (rad * Math.cos(ang2)), y:circumcent.y - (rad * Math.sin(ang2)) };
+	const pointC = { x:circumcent.x + (rad * Math.cos(ang3)), y:circumcent.y - (rad * Math.sin(ang3)) };
 
 	//Calculate internal angles of triangle
 	const angMin = Math.min(ang1, ang2, ang3);
 	const angMax = Math.max(ang1, ang2, ang3);
-	const angA = (ang1 != angMin && ang1 != angMax) ? (180 - Math.round((Math.abs(ang2 - ang3) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang2 - ang3) / 2) * 180 / Math.PI));
-	const angB = (ang2 != angMin && ang2 != angMax) ? (180 - Math.round((Math.abs(ang1 - ang3) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang1 - ang3) / 2) * 180 / Math.PI));
-	const angC = (ang3 != angMin && ang3 != angMax) ? (180 - Math.round((Math.abs(ang2 - ang1) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang2 - ang1) / 2) * 180 / Math.PI));
+	const angA = (ang1 !== angMin && ang1 !== angMax) ? (180 - Math.round((Math.abs(ang2 - ang3) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang2 - ang3) / 2) * 180 / Math.PI));
+	const angB = (ang2 !== angMin && ang2 !== angMax) ? (180 - Math.round((Math.abs(ang1 - ang3) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang1 - ang3) / 2) * 180 / Math.PI));
+	const angC = (ang3 !== angMin && ang3 !== angMax) ? (180 - Math.round((Math.abs(ang2 - ang1) / 2) * 180 / Math.PI)) : (Math.round((Math.abs(ang2 - ang1) / 2) * 180 / Math.PI));
 
-	scaleAndCentre(pointA, pointB, pointC);
+	/* Original Triangle
+	ctx.strokeStyle = 'red';
+	ctx.fillStyle = 'red';
+	ctx.fillRect(circumcent.x, circumcent.y, 3, 3);
+	ctx.beginPath();
+	ctx.moveTo(pointA.x, pointA.y);
+	ctx.lineTo(pointB.x, pointB.y);
+	ctx.lineTo(pointC.x, pointC.y);
+	ctx.lineTo(pointA.x, pointA.y);
+	ctx.stroke();
+	*/
+
+	scaleAndCentre(pointA, pointB, pointC, circumcent, rad);
+
+	console.log(`A:${pointA.x},${pointA.y}`);
+	console.log(`B:${pointB.x},${pointB.y}`);
+	console.log(`C:${pointC.x},${pointC.y}`);
+
 	const cent = centroid(pointA, pointB, pointC);
 
+	//draw triangle
 	ctx.font = '14px Arial';
 	ctx.textAlign = 'center';
 	ctx.strokeStyle = 'black';
@@ -41,7 +66,7 @@ export function generateTriangle() {
 	ctx.lineTo(pointA.x, pointA.y);
 	ctx.stroke();
 
-	// angle measures
+	// display angle measures
 	ctx.fillText(`A:${angA}`, 20, 20);
 	ctx.fillText(`B:${angB}`, 60, 20);
 	ctx.fillText(`C:${angC}`, 100, 20);
@@ -53,6 +78,17 @@ export function generateTriangle() {
 	ctx.fillText('A', ALoc.x, ALoc.y);
 	ctx.fillText('B', BLoc.x, BLoc.y);
 	ctx.fillText('C', CLoc.x, CLoc.y);
+
+	// label sides
+	const sideaLoc = sideLabelLocation(circumcent, pointB, pointC);
+	const aLen = Math.ceil(dist(pointB, pointC));
+	ctx.fillText(aLen, sideaLoc.x, sideaLoc.y);
+	const sidebLoc = sideLabelLocation(circumcent, pointA, pointC);
+	const bLen = Math.ceil(dist(pointA, pointC));
+	ctx.fillText(bLen, sidebLoc.x, sidebLoc.y);
+	const sidecLoc = sideLabelLocation(circumcent, pointB, pointA);
+	const cLen = Math.ceil(dist(pointB, pointA));
+	ctx.fillText(cLen, sidecLoc.x, sidecLoc.y);
 
 	// angle markers
 	ctx.lineWidth = 1;
@@ -91,13 +127,28 @@ function midpoint(point1, point2) {
 function centroid(point1, point2, point3) {
 	return { x:(point1.x + point2.x + point3.x) / 3, y:(point1.y + point2.y + point3.y) / 3 };
 }
-function angleLabelLocation(pointM, pointX) {
+function angleLabelLocation(centre, pointX) {
 	//pointM is midpoint, pointX is corner
-	const distance = dist(pointM, pointX);
+	const distance = dist(centre, pointX);
 	const rat = 10 / distance;
-	const deltax = pointM.x - pointX.x;
-	const deltay = pointM.y - pointX.y;
+	const deltax = centre.x - pointX.x;
+	const deltay = centre.y - pointX.y;
 	return { x:pointX.x - (deltax * rat), y:pointX.y - (deltay * rat) + 7 };
+}
+
+function sideLabelLocation(centre, point1, point2) {
+	/* problem: if circumcent is outside of triangle, one label will be INSIDE the triangle
+	solution 1: check if circumcent is inside triangle using formula. if it is, check all points for???
+	solution 2: calculate 2 points for each side, take the one that is further from opposite corner.
+	solution 3: calculate point and it's distance to opposite corner. If it's less than distance between mid and opposite corner, regenerate
+
+	*/
+	const mid = midpoint(point1, point2);
+	const distance = dist(centre, mid);
+	const deltax = centre.x - mid.x;
+	const deltay = centre.y - mid.y;
+	const rat = 20 / distance;
+	return { x:mid.x - (deltax * rat), y:mid.y - (deltay * rat) + 7 };
 }
 
 function angleFromZero(point1, point2) {
@@ -111,7 +162,7 @@ function angleFromZero(point1, point2) {
 	}
 }
 
-function scaleAndCentre(point1, point2, point3) {
+function scaleAndCentre(point1, point2, point3, circcent, rad) {
 	let leftmost;
 	if (point1.x <= point2.x && point1.x <= point3.x) {
 		leftmost = point1;
@@ -145,17 +196,17 @@ function scaleAndCentre(point1, point2, point3) {
 		bottommost = point3;
 	}
 	let midlr;
-	if ((leftmost == point1 && rightmost == point2) || (leftmost == point2 && rightmost == point1)) {
+	if ((leftmost === point1 && rightmost === point2) || (leftmost === point2 && rightmost === point1)) {
 		midlr = point3;
-	} else if ((leftmost == point1 && rightmost == point3) || (leftmost == point3 && rightmost == point1)) {
+	} else if ((leftmost === point1 && rightmost === point3) || (leftmost === point3 && rightmost === point1)) {
 		midlr = point2;
 	} else {
 		midlr = point1;
 	}
 	let midtb;
-	if ((topmost == point1 && bottommost == point2) || (topmost == point2 && bottommost == point1)) {
+	if ((topmost === point1 && bottommost === point2) || (topmost === point2 && bottommost === point1)) {
 		midtb = point3;
-	} else if ((topmost == point1 && bottommost == point3) || (topmost == point3 && bottommost == point1)) {
+	} else if ((topmost === point1 && bottommost === point3) || (topmost === point3 && bottommost === point1)) {
 		midtb = point2;
 	} else {
 		midtb = point1;
@@ -166,22 +217,28 @@ function scaleAndCentre(point1, point2, point3) {
 	const prop = height / width;
 	const tbprop = (midtb.y - topmost.y) / height;
 	const lrprop = (midlr.x - leftmost.x) / width;
+	const centYrat = (circcent.y - topmost.y) / height;
+	const centXrat = (circcent.x - leftmost.x) / width;
 	if (prop > 1) {
-		const newwid = 250 / prop;
-		topmost.y = 25;
-		bottommost.y = 275;
-		midtb.y = 25 + (tbprop * 250);
-		leftmost.x = 150 - (newwid / 2);
-		rightmost.x = 150 + (newwid / 2);
+		const newwid = 2 * rad / prop;
+		topmost.y = circcent.y - rad;
+		bottommost.y = circcent.y + rad;
+		midtb.y = topmost.y + (tbprop * 2 * rad);
+		leftmost.x = circcent.x - (newwid / 2);
+		rightmost.x = circcent.x + (newwid / 2);
 		midlr.x = leftmost.x + newwid * lrprop;
+		circcent.y = topmost.y + (2 * rad * centYrat);
+		circcent.x = leftmost.x + (newwid * centXrat);
 	} else {
-		const newhei = 250 * prop;
-		leftmost.x = 25;
-		rightmost.x = 275;
-		midlr.x = 25 + (lrprop * 250);
-		topmost.y = 150 - (newhei / 2);
-		bottommost.y = 150 + (newhei / 2);
+		const newhei = 2 * rad * prop;
+		leftmost.x = circcent.x - rad;
+		rightmost.x = circcent.y + rad;
+		midlr.x = leftmost.x + (lrprop * 2 * rad);
+		topmost.y = circcent.y - (newhei / 2);
+		bottommost.y = circcent.y + (newhei / 2);
 		midtb.y = topmost.y + newhei * tbprop;
+		circcent.x = leftmost.x + (2 * rad * centXrat);
+		circcent.y = topmost.y + newhei * centYrat;
 	}
 
 }

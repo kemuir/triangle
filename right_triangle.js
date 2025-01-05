@@ -78,7 +78,7 @@ export function generateRightTriangle() {
 	//LABELS
 	ctx.textAlign = 'center';
 	const aorb = Math.random();
-	if (mode == 'hyp') {
+	if (mode === 'hyp') {
 		ctx.fillText(alabel, 150, yend + (yoffset * 20));
 		ctx.fillText(blabel, xend + (xoffset * 15), 150);
 		ctx.fillText('x', 150 - (xoffset * 10), 150 - (yoffset * 10));
