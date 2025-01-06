@@ -14,12 +14,8 @@ export function generateTriangle() {
 		ang3 = Math.random() * 2 * Math.PI;
 	}
 
-	/* Come back to this - why is ctx.height undefined?
-	const circumcent = { x:ctx.width / 2, y:ctx.height / 2 };
-	const rad = ctx.height * 5 / 12
-	*/
-	const circumcent = { x: 150, y: 150 };
-	const rad = 125;
+	const circumcent = { x:canvas.width / 2, y:canvas.height / 2 };
+	const rad = canvas.height * 5 / 12;
 
 	//Calculate x,y coordinates based on angles
 	const pointA = { x:circumcent.x + (rad * Math.cos(ang1)), y:circumcent.y - (rad * Math.sin(ang1)) };
