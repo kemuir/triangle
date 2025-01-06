@@ -76,13 +76,13 @@ export function generateTriangle() {
 	ctx.fillText('C', CLoc.x, CLoc.y);
 
 	// label sides
-	const sideaLoc = sideLabelLocation(circumcent, pointB, pointC);
+	const sideaLoc = sideLabelLocation(pointB, pointC, pointA);
 	const aLen = Math.ceil(dist(pointB, pointC));
 	ctx.fillText(aLen, sideaLoc.x, sideaLoc.y);
-	const sidebLoc = sideLabelLocation(circumcent, pointA, pointC);
+	const sidebLoc = sideLabelLocation(pointA, pointC, pointB);
 	const bLen = Math.ceil(dist(pointA, pointC));
 	ctx.fillText(bLen, sidebLoc.x, sidebLoc.y);
-	const sidecLoc = sideLabelLocation(circumcent, pointB, pointA);
+	const sidecLoc = sideLabelLocation(pointB, pointA, pointC);
 	const cLen = Math.ceil(dist(pointB, pointA));
 	ctx.fillText(cLen, sidecLoc.x, sidecLoc.y);
 
@@ -124,7 +124,6 @@ function centroid(point1, point2, point3) {
 	return { x:(point1.x + point2.x + point3.x) / 3, y:(point1.y + point2.y + point3.y) / 3 };
 }
 function angleLabelLocation(centre, pointX) {
-	//pointM is midpoint, pointX is corner
 	const distance = dist(centre, pointX);
 	const rat = 10 / distance;
 	const deltax = centre.x - pointX.x;
@@ -132,19 +131,21 @@ function angleLabelLocation(centre, pointX) {
 	return { x:pointX.x - (deltax * rat), y:pointX.y - (deltay * rat) + 7 };
 }
 
-function sideLabelLocation(centre, point1, point2) {
-	/* problem: if circumcent is outside of triangle, one label will be INSIDE the triangle
-	solution 1: check if circumcent is inside triangle using formula. if it is, check all points for???
-	solution 2: calculate 2 points for each side, take the one that is further from opposite corner.
-	solution 3: calculate point and it's distance to opposite corner. If it's less than distance between mid and opposite corner, regenerate
+function sideLabelLocation(point1, point2, pointOpp) {
 
-	*/
 	const mid = midpoint(point1, point2);
-	const distance = dist(centre, mid);
-	const deltax = centre.x - mid.x;
-	const deltay = centre.y - mid.y;
-	const rat = 20 / distance;
-	return { x:mid.x - (deltax * rat), y:mid.y - (deltay * rat) + 7 };
+	const deltax = point1.x - point2.x;
+	const deltay = point1.y - point2.y;
+	const rat = 20 / dist(point1, point2);
+	const loc1 = { x:mid.x + (deltay * rat), y:mid.y - (deltax * rat) + 7 };
+	const loc2 = { x:mid.x - (deltay * rat), y:mid.y + (deltax * rat) + 7 };
+
+	if (dist(loc1, pointOpp) > dist(loc2, pointOpp)) {
+		return loc1;
+	} else {
+		return loc2;
+	}
+
 }
 
 function angleFromZero(point1, point2) {
@@ -159,6 +160,7 @@ function angleFromZero(point1, point2) {
 }
 
 function scaleAndCentre(point1, point2, point3, circcent, rad) {
+	// Not currently using circcent relocation - was originally used for side labels
 	let leftmost;
 	if (point1.x <= point2.x && point1.x <= point3.x) {
 		leftmost = point1;
